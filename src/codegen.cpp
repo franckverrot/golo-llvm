@@ -148,9 +148,11 @@ Value* NModule::codeGen(CodeGenContext& context, int depth)
 Value* NMethodCall::codeGen(CodeGenContext& context, int depth)
 {
   Debug debug;
-  Function *function = context.module->getFunction(id.name.c_str());
+  std::string fname = context.module->getModuleIdentifier() + "." + id.name;
+  Function *function = context.module->getFunction(fname.c_str());
   if (function == NULL) {
-    debug(depth) << "[ERR]" << "no such function " << id.name << endl;
+    debug(depth) << "[ERR]" << "no such function " << fname << endl;
+    exit(-1);
   }
   std::vector<Value*> args;
   ExpressionList::const_iterator it;
@@ -158,7 +160,7 @@ Value* NMethodCall::codeGen(CodeGenContext& context, int depth)
     args.push_back((**it).codeGen(context, depth + 1));
   }
   CallInst *call = CallInst::Create(function, makeArrayRef(args), "", context.currentBlock());
-  debug(depth) << "Creating method call: " << id.name << endl;
+  debug(depth) << "Creating method call: " << fname << endl;
   return call;
 }
 
@@ -168,10 +170,10 @@ Value* NBinaryOperator::codeGen(CodeGenContext& context, int depth)
   debug(depth) << "Creating binary operation " << op << endl;
   Instruction::BinaryOps instr;
   switch (op) {
-    case TPLUS: 	instr = Instruction::Add; goto math;
-    case TMINUS: 	instr = Instruction::Sub; goto math;
-    case TMUL: 		instr = Instruction::Mul; goto math;
-    case TDIV: 		instr = Instruction::SDiv; goto math;
+    case TPLUS:   instr = Instruction::Add; goto math;
+    case TMINUS:   instr = Instruction::Sub; goto math;
+    case TMUL:     instr = Instruction::Mul; goto math;
+    case TDIV:     instr = Instruction::SDiv; goto math;
 
                   /* TODO comparison */
   }
@@ -187,9 +189,9 @@ Value* NAssignment::codeGen(CodeGenContext& context, int depth)
   Debug debug;
   debug(depth) << "Creating assignment for " << lhs.name << endl;
   // cannot really happen in fact, as we create variables on the fly
-	// I think the variables should be declared though, so something's
-	// required to change to have a special case for func arguments
-	//FIXME: la declaration de variable devrait se faire apres l'assignment?
+  // I think the variables should be declared though, so something's
+  // required to change to have a special case for func arguments
+  //FIXME: la declaration de variable devrait se faire apres l'assignment?
   //if (context.locals().find(lhs.name) == context.locals().end()) {
   //  debug(depth) << "[ERR]" << "undeclared variable " << lhs.name << endl;
   //  return NULL;
@@ -251,14 +253,14 @@ Value* NVariableDeclaration::codeGen(CodeGenContext& context, int depth)
   AllocaInst *alloc = new AllocaInst(type, id.name.c_str(), context.currentBlock());
   context.locals()[id.name] = alloc;
   if (assignmentExpr != NULL) {
-		debug(depth + 1) << "and assign expr..." << endl;
+    debug(depth + 1) << "and assign expr..." << endl;
     NAssignment assn(id, *assignmentExpr);
     Value * assgen = assn.codeGen(context, depth + 1);
-		debug(depth + 1) << "[" << typeid(assignmentExpr).name() << "]" << endl;
+    debug(depth + 1) << "[" << typeid(assignmentExpr).name() << "]" << endl;
   } else {
-		debug(depth + 1) << "but without assign expr..." << endl;
+    debug(depth + 1) << "but without assign expr..." << endl;
   }
-	return NULL;
+  return NULL;
   return context.locals()[id.name];
 }
 
@@ -271,17 +273,17 @@ Value* NFunctionDeclaration::codeGen(CodeGenContext& context, int depth)
     //argTypes.push_back(typeOf((**it).type));
     argTypes.push_back(typeOf(*(new NIdentifier("int"))));
   }
-  std::string fname = id.name;
+  std::string fname = context.module->getModuleIdentifier() + "." + id.name;
 
   NIdentifier * typeIdentifier;
 
-  if(fname == "main") {
-    debug(depth) << "renaming main to _golo_entry_point " << endl;
-    fname = "_golo_entry_point";
-    typeIdentifier = new NIdentifier("[string]");
-  } else {
-    typeIdentifier = new NIdentifier("int");
-  }
+  //if(fname == "main") {
+  //  debug(depth) << "renaming main to _golo_entry_point " << endl;
+  //  fname = "_golo_entry_point";
+  //  typeIdentifier = new NIdentifier("[string]");
+  //} else {
+  //  typeIdentifier = new NIdentifier("int");
+  //}
   //TODO: unforce
   typeIdentifier = new NIdentifier("int");
 
