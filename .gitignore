@@ -1,0 +1,9 @@
+*.o
+parser.cpp
+parser.hpp
+tokens.cpp
+a.out
+*.bc
+*.s
+tmp/*
+build/*
