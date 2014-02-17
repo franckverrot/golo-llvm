@@ -198,14 +198,10 @@ Value* NAssignment::codeGen(CodeGenContext& context, int depth)
   debug(depth) << "1Creating assignment for " << lhs.name << endl;
 
   Type * type = typeOf(*(new NIdentifier("int")));
-  debug(depth) << "2Creating assignment for " << lhs.name << endl;
-  AllocaInst *alloc = new AllocaInst(typeOf(*(new NIdentifier("int"))), lhs.name.c_str(), context.currentBlock());
-  debug(depth) << "3Creating assignment for " << lhs.name << endl;
-  context.locals()[lhs.name] = alloc;
-  debug(depth) << "4Creating assignment for " << lhs.name << endl;
+  //AllocaInst *alloc = new AllocaInst(typeOf(*(new NIdentifier("int"))), lhs.name.c_str(), context.currentBlock());
+  //context.locals()[lhs.name] = alloc;
 
   Value * addr = context.locals()[lhs.name];
-  debug(depth) << "5Creating assignment for " << lhs.name << endl;
   return new StoreInst(val, addr, /* volatile? */ false, /* insertAtEnd */ context.currentBlock());
 }
 
@@ -251,16 +247,18 @@ Value* NVariableDeclaration::codeGen(CodeGenContext& context, int depth)
 {
   Debug debug;
   debug(depth) << "Creating variable declaration " << id.name << endl;
-  //Type * type = typeOf(*(new NIdentifier("int")));
-  //AllocaInst *alloc = new AllocaInst(type, id.name.c_str(), context.currentBlock());
-  //context.locals()[id.name] = alloc;
+  Type * type = typeOf(*(new NIdentifier("int")));
+  AllocaInst *alloc = new AllocaInst(type, id.name.c_str(), context.currentBlock());
+  context.locals()[id.name] = alloc;
   if (assignmentExpr != NULL) {
 		debug(depth + 1) << "and assign expr..." << endl;
     NAssignment assn(id, *assignmentExpr);
-    assn.codeGen(context, depth + 1);
+    Value * assgen = assn.codeGen(context, depth + 1);
+		debug(depth + 1) << "[" << typeid(assignmentExpr).name() << "]" << endl;
   } else {
 		debug(depth + 1) << "but without assign expr..." << endl;
   }
+	return NULL;
   return context.locals()[id.name];
 }
 
