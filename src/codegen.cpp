@@ -5,6 +5,27 @@
 
 using namespace std;
 
+class Debug 
+{
+  public:
+    Debug& operator()(int depth) { 
+      for(int i = 0; i < depth; i++) { std::cerr << '\t'; }
+      std::cerr << depth << " ";
+      return *this;
+    }
+
+    template<class T>
+      Debug& operator<<(T t) {
+        std::cerr << t;
+        return *this;
+      }
+
+    Debug& operator<<(ostream& (*f)(ostream& o)) {
+      std::cerr << f;
+      return *this;
+    };
+};
+
 CodeGenContext::CodeGenContext(std::string moduleName) {
   module = new Module(moduleName, getGlobalContext());
 }
@@ -12,18 +33,37 @@ CodeGenContext::CodeGenContext(std::string moduleName) {
 /* Compile the AST into a module */
 void CodeGenContext::generateCode(NModule& mod, NBlock& root)
 {
+  Debug debug;
   std::cerr << "Starting code generation..." << endl << std::flush;
 
   /* Create the top level interpreter function to call as entry */
   vector<Type*> argTypes;
-  FunctionType *ftype = FunctionType::get(Type::getVoidTy(getGlobalContext()), makeArrayRef(argTypes), false);
-  mainFunction = Function::Create(ftype, GlobalValue::ExternalLinkage, mod.ident.name, module);
+  argTypes.push_back(Type::getInt32Ty(getGlobalContext()));
+  // This creates the i8* type
+  PointerType * PointerTy = PointerType::get(Type::getInt8Ty(getGlobalContext()), 0);
+  // This creates the i8** type
+  PointerType * PointerPtrTy = PointerType::get(PointerTy, 0);
+  argTypes.push_back(PointerPtrTy);
+  FunctionType *ftype = FunctionType::get(Type::getInt64Ty(getGlobalContext()), makeArrayRef(argTypes), false);
+
+  mainFunction = Function::Create(ftype, GlobalValue::ExternalLinkage, "main", module);
   BasicBlock *bblock = BasicBlock::Create(getGlobalContext(), "entry", mainFunction, 0);
 
   /* Push a new variable/block context */
   pushBlock(bblock);
   root.codeGen(*this, 0); /* emit bytecode for the toplevel block */
-  ReturnInst::Create(getGlobalContext(), bblock);
+
+  Function * function = module->getFunction(mod.ident.name + "_main");
+  if (function == NULL) {
+    debug(0) << "[ERR]" << "no such function " << mod.ident.name << "_main" << endl;
+    exit(-1);
+  }
+
+  std::vector<Value*> args;
+  args.push_back(ConstantInt::get(Type::getInt64Ty(getGlobalContext()), 42, true));
+  CallInst *call = CallInst::Create((llvm::Function*)function, makeArrayRef(args), "", bblock);
+  ReturnInst::Create(getGlobalContext(), ConstantInt::get(Type::getInt64Ty(getGlobalContext()),0), bblock);
+  //ReturnInst::Create(getGlobalContext(), call->getCalledValue(), bblock);
   popBlock();
 
   runPasses();
@@ -73,27 +113,6 @@ static Type *typeOf(const NIdentifier& type)
   }
   return Type::getVoidTy(getGlobalContext());
 }
-
-class Debug 
-{
-  public:
-    Debug& operator()(int depth) { 
-      for(int i = 0; i < depth; i++) { std::cerr << '\t'; }
-      std::cerr << depth << " ";
-      return *this;
-    }
-
-    template<class T>
-      Debug& operator<<(T t) {
-        std::cerr << t;
-        return *this;
-      }
-
-    Debug& operator<<(ostream& (*f)(ostream& o)) {
-      std::cerr << f;
-      return *this;
-    };
-};
 
 /* -- Code Generation -- */
 
@@ -270,6 +289,7 @@ Value* NFunctionDeclaration::codeGen(CodeGenContext& context, int depth)
   vector<Type*> argTypes;
   VariableList::const_iterator it;
   GlobalValue::LinkageTypes linkage;
+
   if (externalLinkage) {
     linkage = GlobalValue::ExternalLinkage;
   }

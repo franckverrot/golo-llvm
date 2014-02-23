@@ -1,5 +1,5 @@
 build/goloc-llvm -o tmp/omg.ll -c $1
-cat main.ll >> tmp/omg.ll
+#cat main.ll >> tmp/omg.ll
 llc --disable-cfi tmp/omg.ll -o tmp/omg.s
 gcc -o $2 tmp/omg.s
 chmod +x $2
