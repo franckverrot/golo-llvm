@@ -4,7 +4,7 @@ function wow  = |such| {
   return such * 3
 }
 
-function very = |omg, amazing| {
+local function very = |omg, amazing| {
   return omg * amazing
 }
 

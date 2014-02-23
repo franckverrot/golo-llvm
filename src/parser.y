@@ -34,7 +34,7 @@
 %token <token> TCEQ TCNE TCLT TCLE TCGT TCGE TEQUAL TPIPE
 %token <token> TLPAREN TRPAREN TLBRACE TRBRACE TCOMMA TDOT
 %token <token> TPLUS TMINUS TMUL TDIV
-%token <token> TRETURN TFUNC TLET
+%token <token> TRETURN TFUNC TLET TVISIBILITY
 
 /* Define the type of node our nonterminal symbols represent.
    The types refer to the %union declaration above. Ex: when
@@ -86,7 +86,9 @@ var_decl : TLET ident { $$ = new NVariableDeclaration(*$2); }
      ;
 
 func_decl : TFUNC ident TEQUAL TPIPE func_decl_args TPIPE block
-          { $$ = new NFunctionDeclaration(*$2, *$5, *$7);}
+            { $$ = new NFunctionDeclaration(*$2, *$5, *$7);}
+          | TVISIBILITY TFUNC ident TEQUAL TPIPE func_decl_args TPIPE block
+            { $$ = new NFunctionDeclaration(*$3, *$6, *$8, false);}
       ;
 
 func_decl_args : /*blank*/  { $$ = new VariableList(); }

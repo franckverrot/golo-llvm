@@ -269,6 +269,13 @@ Value* NFunctionDeclaration::codeGen(CodeGenContext& context, int depth)
   Debug debug;
   vector<Type*> argTypes;
   VariableList::const_iterator it;
+  GlobalValue::LinkageTypes linkage;
+  if (externalLinkage) {
+    linkage = GlobalValue::ExternalLinkage;
+  }
+  else {
+    linkage = GlobalValue::InternalLinkage;
+  }
   for (it = arguments.begin(); it != arguments.end(); it++) {
     //argTypes.push_back(typeOf((**it).type));
     argTypes.push_back(typeOf(*(new NIdentifier("int"))));
@@ -289,7 +296,7 @@ Value* NFunctionDeclaration::codeGen(CodeGenContext& context, int depth)
 
   debug(depth) << "Function " << fname.c_str() << " has " << arguments.size() << " argument(s)" << endl;
   FunctionType *ftype = FunctionType::get(typeOf(*typeIdentifier), makeArrayRef(argTypes), false);
-  Function *function = Function::Create(ftype, GlobalValue::ExternalLinkage, fname.c_str(), context.module);
+  Function *function = Function::Create(ftype, linkage, fname.c_str(), context.module);
   BasicBlock *bblock = BasicBlock::Create(getGlobalContext(), "entry", function, 0);
 
   context.pushBlock(bblock);

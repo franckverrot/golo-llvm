@@ -127,8 +127,9 @@ class NFunctionDeclaration : public NStatement {
     const NIdentifier& id;
     VariableList arguments;
     NBlock block;
-    NFunctionDeclaration(const NIdentifier& id, const VariableList& arguments, NBlock& block) :
-      id(id), arguments(arguments), block(block) { }
+    bool externalLinkage;
+    NFunctionDeclaration(const NIdentifier& id, const VariableList& arguments, NBlock& block, bool externalLinkage = true) :
+      id(id), arguments(arguments), block(block), externalLinkage(externalLinkage) { }
     virtual llvm::Value* codeGen(CodeGenContext& context, int depth);
 };
 
