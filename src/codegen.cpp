@@ -102,6 +102,16 @@ GenericValue CodeGenContext::runCode() {
 }
 
 /* Returns an LLVM type based on the identifier */
+static Type *llvmTypeForNode(const Node& node)
+{
+  if (node.returnType == "int") {
+    return Type::getInt64Ty(getGlobalContext());
+  }
+  else {
+    return Type::getVoidTy(getGlobalContext());
+  }
+}
+
 static Type *typeOf(const NIdentifier& type) 
 {
   Type * charType = Type::getInt8Ty(getGlobalContext());
@@ -279,9 +289,22 @@ Value* NVariableDeclaration::codeGen(CodeGenContext& context, int depth)
   if (assignmentExpr != NULL) {
     debug(depth + 1) << "and assign expr..." << endl;
     NAssignment assn(id, *assignmentExpr);
+
+    //type = llvmTypeForNode(assn.rhs);
+    //alloc = new AllocaInst(type, id.name.c_str(), context.currentBlock());
+    //context.locals()[id.name] = alloc;
+    type = typeOf(*(new NIdentifier("int")));
+    alloc = new AllocaInst(type, id.name.c_str(), context.currentBlock());
+    context.locals()[id.name] = alloc;
+
     Value * assgen = assn.codeGen(context, depth + 1);
+
     debug(depth + 1) << "[" << typeid(assignmentExpr).name() << "]" << endl;
   } else {
+    type = typeOf(*(new NIdentifier("int")));
+    alloc = new AllocaInst(type, id.name.c_str(), context.currentBlock());
+    context.locals()[id.name] = alloc;
+
     debug(depth + 1) << "but without assign expr..." << endl;
   }
   return NULL;

@@ -15,11 +15,13 @@ typedef std::vector<NVariableDeclaration*> VariableList;
 
 class Node {
   public:
+    std::string returnType;
     virtual ~Node() {}
     virtual llvm::Value* codeGen(CodeGenContext& context, int depth) { return NULL; }
 };
 
 class NExpression : public Node {
+
 };
 
 class NStatement : public Node {
@@ -35,7 +37,7 @@ class NString : public NExpression {
 class NInteger : public NExpression {
   public:
     long long value;
-    NInteger(long long value) : value(value) { };
+    NInteger(long long value) : value(value) { returnType = "int"; };
     virtual llvm::Value* codeGen(CodeGenContext& context, int depth);
 };
 
