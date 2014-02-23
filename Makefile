@@ -7,7 +7,7 @@ OBJS = build/parser.o  \
        build/corefn.o  \
        build/golo-llvm.o  \
 
-CPPFLAGS = -I. `llvm-config --cppflags --ldflags --libs core jit native bitwriter`
+CPPFLAGS = -g -I. `llvm-config --cppflags --ldflags --libs core jit native bitwriter`
 LDFLAGS  = `llvm-config --cppflags --ldflags --libs core jit native bitwriter`
 LIBS     = `llvm-config --cppflags --ldflags --libs core jit native bitwriter`
 

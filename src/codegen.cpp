@@ -91,8 +91,6 @@ void CodeGenContext::runPasses() {
   pm.run(*module);
 }
 
-
-
 /* Executes the AST by running the main function */
 GenericValue CodeGenContext::runCode() {
   std::cerr << "Running code...\n";
