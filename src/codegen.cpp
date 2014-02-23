@@ -38,6 +38,7 @@ void CodeGenContext::generateCode(NModule& mod, NBlock& root)
 
   /* Create the top level interpreter function to call as entry */
   vector<Type*> argTypes;
+
   argTypes.push_back(Type::getInt32Ty(getGlobalContext()));
   // This creates the i8* type
   PointerType * PointerTy = PointerType::get(Type::getInt8Ty(getGlobalContext()), 0);
@@ -48,6 +49,12 @@ void CodeGenContext::generateCode(NModule& mod, NBlock& root)
 
   mainFunction = Function::Create(ftype, GlobalValue::ExternalLinkage, "main", module);
   BasicBlock *bblock = BasicBlock::Create(getGlobalContext(), "entry", mainFunction, 0);
+
+  Function::arg_iterator argsValues = mainFunction->arg_begin();
+  Value* arg = argsValues++;
+  arg->setName("argc");
+  arg = argsValues++;
+  arg->setName("argv");
 
   /* Push a new variable/block context */
   pushBlock(bblock);
