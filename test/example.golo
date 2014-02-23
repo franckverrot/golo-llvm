@@ -11,6 +11,6 @@ local function very = |omg, amazing| {
 function main = |args| {
   #let makeSomeNoise = "BOOM!!1!"
   let seven = 7
-  echo(wow(very(2,seven)))
+  println(wow(very(2,seven)))
   return 0
 }

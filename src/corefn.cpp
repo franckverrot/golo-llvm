@@ -25,18 +25,18 @@ llvm::Function* createPrintfFunction(CodeGenContext& context)
   return func;
 }
 
-void createEchoFunction(CodeGenContext& context, llvm::Function* printfFn)
+void createPrintlnFunction(CodeGenContext& context, llvm::Function* printfFn)
 {
-  std::vector<llvm::Type*> echo_arg_types;
-  echo_arg_types.push_back(llvm::Type::getInt64Ty(getGlobalContext()));
+  std::vector<llvm::Type*> println_arg_types;
+  println_arg_types.push_back(llvm::Type::getInt64Ty(getGlobalContext()));
 
-  llvm::FunctionType* echo_type =
+  llvm::FunctionType* println_type =
     llvm::FunctionType::get(
-        llvm::Type::getVoidTy(getGlobalContext()), echo_arg_types, false);
+        llvm::Type::getVoidTy(getGlobalContext()), println_arg_types, false);
 
   llvm::Function *func = llvm::Function::Create(
-      echo_type, llvm::Function::InternalLinkage,
-      llvm::Twine("llvm_golo_echo"),
+      println_type, llvm::Function::InternalLinkage,
+      llvm::Twine("llvm_golo_println"),
       context.module
       );
   llvm::BasicBlock *bblock = llvm::BasicBlock::Create(getGlobalContext(), "entry", func, 0);
@@ -72,5 +72,5 @@ void createEchoFunction(CodeGenContext& context, llvm::Function* printfFn)
 
 void createCoreFunctions(CodeGenContext& context){
   llvm::Function* printfFn = createPrintfFunction(context);
-  createEchoFunction(context, printfFn);
+  createPrintlnFunction(context, printfFn);
 }
