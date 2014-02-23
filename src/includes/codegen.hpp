@@ -36,8 +36,9 @@ class CodeGenContext {
     Function *mainFunction;
 
 public:
+    Imports * imports;
     Module *module;
-    CodeGenContext(std::string moduleName);
+    CodeGenContext(std::string moduleName, Imports* imports);
 
     void generateCode(NModule& module, NBlock& root);
     GenericValue runCode();

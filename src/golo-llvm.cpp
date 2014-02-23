@@ -27,7 +27,7 @@ GoloLLVM::GoloLLVM(int argc, char **argv) {
   std::cerr << "Program block is " << programBlock << std::endl;
   // see http://comments.gmane.org/gmane.comp.compilers.llvm.devel/33877
   InitializeNativeTarget();
-  CodeGenContext context(topLevelModule->ident.name);
+  CodeGenContext context(topLevelModule->ident.name, imports);
   createCoreFunctions(context);
   context.generateCode(*topLevelModule, *programBlock);
   //context.runCode();

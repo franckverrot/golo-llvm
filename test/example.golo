@@ -1,4 +1,5 @@
 module llvm_golo
+import crt
 
 function wow  = |such| {
   return such * 3

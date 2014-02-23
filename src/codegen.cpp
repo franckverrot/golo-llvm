@@ -5,8 +5,9 @@
 
 using namespace std;
 
-CodeGenContext::CodeGenContext(std::string moduleName) {
+CodeGenContext::CodeGenContext(std::string moduleName, Imports* imports) {
   module = new Module(moduleName, getGlobalContext());
+  imports = imports;
 }
 
 /* Compile the AST into a module */
@@ -145,9 +146,32 @@ Value* NModule::codeGen(CodeGenContext& context, int depth)
   return ConstantInt::get(Type::getInt64Ty(getGlobalContext()), 42, true);
 }
 
+Value* NImport::codeGen(CodeGenContext& context, int depth)
+{
+  Debug debug;
+  debug(depth) << "Creating import reference: " << ident.name << endl;
+  //if (context.locals().find(name) == context.locals().end()) {
+  //  debug(depth) << "[ERR]" << "undeclared variable " << name << endl;
+  //  return NULL;
+  //}
+  //return new LoadInst(context.locals()[name], "", false, context.currentBlock());
+  return ConstantInt::get(Type::getInt64Ty(getGlobalContext()), 42, true);
+}
+
 Value* NMethodCall::codeGen(CodeGenContext& context, int depth)
 {
   Debug debug;
+  Imports * imports = context.imports;
+  Imports::iterator iter;
+  for (iter = imports->begin(); iter != imports->end(); ++iter) {
+        std::cout << "iter1" << *iter << endl;
+        std::cout << "iter2" << (*iter)->ident.name << endl;
+        std::cout << "iter.ident" << (*iter)->ident.name << endl;
+        NImport import = **iter; // Note the "*" here
+        std::cout << "qoksoqksqok" << import.ident.name << endl;
+  }
+  std::cout << "so far so good" << endl;
+  //std::cout << import->ident.name << "qsokqosk" << endl;
   std::string fname = context.module->getModuleIdentifier() + "." + id.name;
   Function *function = context.module->getFunction(fname.c_str());
   if (function == NULL) {

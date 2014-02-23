@@ -14,6 +14,7 @@
 [ \t\n]          ;
 "return"        return TOKEN(TRETURN);
 "module"        return TOKEN(TMODULE);
+"import"        return TOKEN(TIMPORT);
 "function"        return TOKEN(TFUNC);
 "let"        return TOKEN(TLET);
 [a-zA-Z_][a-zA-Z0-9_]*   SAVE_TOKEN; return TIDENTIFIER;

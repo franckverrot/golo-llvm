@@ -36,7 +36,7 @@ void createEchoFunction(CodeGenContext& context, llvm::Function* printfFn)
 
   llvm::Function *func = llvm::Function::Create(
       echo_type, llvm::Function::InternalLinkage,
-      llvm::Twine("llvm_golo.echo"),
+      llvm::Twine("crt.echo"),
       context.module
       );
   llvm::BasicBlock *bblock = llvm::BasicBlock::Create(getGlobalContext(), "entry", func, 0);

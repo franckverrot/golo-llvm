@@ -2,16 +2,19 @@
 #define __NODE__H
 #include <iostream>
 #include <vector>
+#include <set>
 #include <llvm/Value.h>
 
 class CodeGenContext;
 class NStatement;
 class NExpression;
 class NVariableDeclaration;
+class NImport;
 
 typedef std::vector<NStatement*> StatementList;
 typedef std::vector<NExpression*> ExpressionList;
 typedef std::vector<NVariableDeclaration*> VariableList;
+typedef std::set<NImport*> Imports;
 
 class Node {
   public:
@@ -136,6 +139,13 @@ class NModule : public NExpression {
   public:
     const NIdentifier& ident;
     NModule(const NIdentifier& ident) : ident(ident) { };
+    virtual llvm::Value* codeGen(CodeGenContext& context, int depth);
+};
+
+class NImport : public NExpression {
+  public:
+    const NIdentifier& ident;
+    NImport(const NIdentifier& ident) : ident(ident) { };
     virtual llvm::Value* codeGen(CodeGenContext& context, int depth);
 };
 

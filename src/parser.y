@@ -6,6 +6,7 @@
   #define YYDEBUG 1
   NBlock *programBlock; /* the top level root node of our final AST */
   NModule *topLevelModule; /* name of the llvm module */
+  Imports *imports; /* imports */
 
   extern int yylex();
   void yyerror(const char *s) { std::printf("Error: %s\n", s);std::exit(1); }
@@ -19,6 +20,8 @@
   NStatement *stmt;
   NIdentifier *ident;
   NModule *module;
+  NImport *import;
+  Imports *imports;
   NVariableDeclaration *var_decl;
   std::vector<NVariableDeclaration*> *varvec;
   std::vector<NExpression*> *exprvec;
@@ -30,7 +33,7 @@
    match our tokens.l lex file. We also define the node type
    they represent.
  */
-%token <string> TIDENTIFIER TINTEGER TSTRING TDOUBLE TMODULE TCOMMENT_BEG
+%token <string> TIDENTIFIER TINTEGER TSTRING TDOUBLE TMODULE TCOMMENT_BEG TIMPORT
 %token <token> TCEQ TCNE TCLT TCLE TCGT TCGE TEQUAL TPIPE
 %token <token> TLPAREN TRPAREN TLBRACE TRBRACE TCOMMA TDOT
 %token <token> TPLUS TMINUS TMUL TDIV
@@ -49,6 +52,8 @@
 %type <stmt> stmt var_decl func_decl comment
 %type <token> comparison
 %type <module> module
+%type <imports> imports
+%type <import> import
 
 /* Operator precedence for mathematical operators */
 %left TPLUS TMINUS
@@ -58,11 +63,17 @@
 
 %%
 
-program : module stmts { topLevelModule = $1; programBlock = $2; }
+program : module imports stmts { topLevelModule = $1; imports = $2; programBlock = $3; }
         ;
 
 module : TMODULE ident { $$ = new NModule(*$2); }
        ;
+
+imports : import  { $$ = new Imports(); $$->insert($1); }
+        | imports import { $1->insert($2); }
+
+import: TIMPORT ident { $$ = new NImport(*$<ident>2); }
+      ;
 
 stmts : stmt { $$ = new NBlock(); $$->statements.push_back($<stmt>1); }
       | stmts stmt { $1->statements.push_back($<stmt>2); }
