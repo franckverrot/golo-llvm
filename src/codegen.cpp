@@ -148,7 +148,7 @@ Value* NModule::codeGen(CodeGenContext& context, int depth)
 Value* NMethodCall::codeGen(CodeGenContext& context, int depth)
 {
   Debug debug;
-  std::string fname = context.module->getModuleIdentifier() + "." + id.name;
+  std::string fname = context.module->getModuleIdentifier() + "_" + id.name;
   Function *function = context.module->getFunction(fname.c_str());
   if (function == NULL) {
     debug(depth) << "[ERR]" << "no such function " << fname << endl;
@@ -273,7 +273,7 @@ Value* NFunctionDeclaration::codeGen(CodeGenContext& context, int depth)
     //argTypes.push_back(typeOf((**it).type));
     argTypes.push_back(typeOf(*(new NIdentifier("int"))));
   }
-  std::string fname = context.module->getModuleIdentifier() + "." + id.name;
+  std::string fname = context.module->getModuleIdentifier() + "_" + id.name;
 
   NIdentifier * typeIdentifier;
 
